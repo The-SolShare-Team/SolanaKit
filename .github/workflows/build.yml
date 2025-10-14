@@ -23,7 +23,7 @@ jobs:
         shell: bash
         run: |
           # Build
-          ./gradlew :${{ env.GRADLE_MODULE }}:assembleXCFramework
+          ./gradlew :${{ env.GRADLE_MODULE }}:assembleReleaseXCFramework
 
           # Compress
           START_DIR=$(pwd)
