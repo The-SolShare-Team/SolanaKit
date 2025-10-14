@@ -1,0 +1,79 @@
+name: ci
+
+on:
+  release:
+    types: [published]
+
+env:
+  XCFRAMEWORK_NAME: "SolanaKit"
+  GRADLE_MODULE: "SolanaKit"
+  SWIFT_REPO_OWNER: "The-SolShare-Team"
+  SWIFT_REPO_NAME: "SolanaKit.swift"
+
+jobs:
+  build-and-publish:
+    name: Build & Publish
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Create and Compress Solana XCFramework file
+        run: |
+          # Build
+          ./gradlew :${{ env.GRADLE_MODULE }}:assemble${{ env.XCFRAMEWORK_NAME }}ReleaseXCFramework
+
+          # Compress
+          START_DIR=$(pwd)
+          cd ${{ env.GRADLE_MODULE }}/$MODULE_NAME/build/XCFrameworks/release/
+          zip -r ${{ env.XCFRAMEWORK_NAME }}.xcframework.zip ${{ env.XCFRAMEWORK_NAME }}.xcframework
+          mv ${{ env.XCFRAMEWORK_NAME }}.xcframework.zip $START_DIR
+
+      - name: Upload XCFramework ZIP archive to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: ${{ env.XCFRAMEWORK_NAME }}.xcframework.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+
+      - name: Update Swift package manifest repository
+        run: |
+          XCFRAMEWORK_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/${{ env.XCFRAMEWORK_NAME }}.xcframework.zip"
+          XCFRAMEWORK_CHECKSUM=$(swift package compute-checksum ${{ env.XCFRAMEWORK_NAME }}.xcframework.zip)
+          sed \
+            -e "s|{{XCFRAMEWORK_URL}}|$XCFRAMEWORK_URL|g" \
+            -e "s|{{XCFRAMEWORK_CHECKSUM}}|$XCFRAMEWORK_CHECKSUM|g" \
+            -e "s|{{XCFRAMEWORK_NAME}}|${{ env.XCFRAMEWORK_NAME }}|g" \
+            -e "s|{{REPOSITORY_NAME}}|${{ env.SWIFT_REPO_NAME }}|g" \
+            Package.swift.template > Package.swift
+
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          git clone https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ env.SWIFT_REPO_OWNER }}/${{ env.SWIFT_REPO_NAME }}.git temp-repo
+          cp Package.swift temp-repo/
+          cd temp-repo
+          git add .
+          git commit -m "Update Swift package manifest"
+          git push origin main
+
+      - name: Create Release in Swift package manifest repository
+        uses: softprops/action-gh-release@v2
+        with:
+          repository: ${{ env.SWIFT_REPO_OWNER }}/${{ env.SWIFT_REPO_NAME }}
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          make_latest: "true"
+          token: ${{ secrets.GH_PAT }}
