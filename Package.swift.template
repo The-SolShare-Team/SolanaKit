@@ -13,6 +13,6 @@ let package = Package(
       .binaryTarget(
          name: "{{XCFRAMEWORK_NAME}}",
          url: "{{XCFRAMEWORK_URL}}",
-         checksum:"{{XCFRAMEWORK_CHECKSUM}}")
+         checksum: "{{XCFRAMEWORK_CHECKSUM}}")
    ]
 )
