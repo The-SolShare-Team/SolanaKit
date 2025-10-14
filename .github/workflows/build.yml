@@ -8,7 +8,7 @@ env:
   XCFRAMEWORK_NAME: "SolanaKit"
   GRADLE_MODULE: "SolanaKit"
   SWIFT_REPO_OWNER: "The-SolShare-Team"
-  SWIFT_REPO_NAME: "SolanaKit"
+  SWIFT_REPO_NAME: "SolanaKit.swift"
 
 jobs:
   build-and-publish:
