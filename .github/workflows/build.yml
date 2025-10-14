@@ -49,7 +49,7 @@ jobs:
             -e "s|{{XCFRAMEWORK_CHECKSUM}}|$XCFRAMEWORK_CHECKSUM|g" \
             -e "s|{{XCFRAMEWORK_NAME}}|${{ env.XCFRAMEWORK_NAME }}|g" \
             -e "s|{{REPOSITORY_NAME}}|${{ env.SWIFT_REPO_NAME }}|g" \
-            "${{ github.action_path }}/Package.swift.template" > Package.swift
+            Package.swift.template > Package.swift
 
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
