@@ -5,6 +5,7 @@ let package = Package(
    name: "{{REPOSITORY_NAME}}",
    platforms: [
      .iOS(.v14),
+     .macOS(.v11),
    ],
    products: [
       .library(name: "{{REPOSITORY_NAME}}", targets: ["{{XCFRAMEWORK_NAME}}"])
