@@ -37,7 +37,7 @@ jobs:
           tag_name: ${{ github.event.release.tag_name }}
           files: ${{ env.XCFRAMEWORK_NAME }}.xcframework.zip
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
       - name: Update Swift package manifest repository
         shell: bash
@@ -54,7 +54,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          git clone https://x-access-token:${{ secrets.GITHUB_PAT }}@github.com/${{ env.SWIFT_REPO_OWNER }}/${{ env.SWIFT_REPO_NAME }}.git temp-repo
+          git clone https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ env.SWIFT_REPO_OWNER }}/${{ env.SWIFT_REPO_NAME }}.git temp-repo
           cp Package.swift temp-repo/
           cd temp-repo
           git add .
@@ -69,4 +69,4 @@ jobs:
           draft: false
           prerelease: false
           make_latest: "true"
-          token: ${{ secrets.GITHUB_PAT }}
+          token: ${{ secrets.GH_PAT }}
